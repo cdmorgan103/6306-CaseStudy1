@@ -15,7 +15,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Data Description
 
 ### Data Load
+```{r, Data Load}
+#Read Data into Variables
+beers <- read.csv("Beers.csv")
+breweries <-read.csv("Breweries.csv")
 
+```
 # Questions of Interest
 
 ##1. How many breweries are present in each state?

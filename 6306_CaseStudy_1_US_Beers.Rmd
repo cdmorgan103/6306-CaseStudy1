@@ -1,0 +1,38 @@
+---
+title: "US Beers and Breweries"
+author: "Christopher Morgan, Dmitry Andreev, & Eduardo Cantu"
+date: "February 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+--Intro--
+
+## Data Description
+
+### Data Load
+
+# Questions of Interest
+
+##1. How many breweries are present in each state?
+
+##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
+
+##3. Report the number of NA's in each column.
+
+##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+##5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
+##6. Summary statistics for the ABV variable.
+
+##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship and EXPLAIN your answer.
+
+#Conclusion
+--Conclusion--
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

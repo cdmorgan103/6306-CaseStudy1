@@ -20,6 +20,12 @@ knitr::opts_chunk$set(echo = TRUE)
 beers <- read.csv("Beers.csv")
 breweries <-read.csv("Breweries.csv")
 
+#Rename beers name column to beerName
+colnames(beers)[1] <- c("beerName")
+
+#Rename brewery name column to brewerCompany
+colnames(breweries)[2] <- c("brewerCompany")
+
 #Rename Brewery_id to Brew_id in beers data, same as in breweries in order to merge data sets
 colnames(beers)[5] <- c("Brew_ID")
 
@@ -32,7 +38,6 @@ colnames(beers)[5] <- c("Brew_ID")
 
 ```{r, Merge Data}
 #Merge beers and breweries data together
-colnames(beers)
 m1 <- merge(beers,breweries,by="Brew_ID")
 
 #First 6 observations from m1

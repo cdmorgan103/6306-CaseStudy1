@@ -2,7 +2,9 @@
 title: "US Beers and Breweries"
 author: "Christopher Morgan, Dmitry Andreev, & Eduardo Cantu"
 date: "February 17, 2018"
-output: html_document
+output: 
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -29,21 +31,40 @@ colnames(breweries)[2] <- c("brewerCompany")
 #Rename Brewery_id to Brew_id in beers data, same as in breweries in order to merge data sets
 colnames(beers)[5] <- c("Brew_ID")
 
+# Trim the leading white-spce from the State
+breweries$State <- trimws(breweries$State)
+
+#Create State Names data frame, inlcuding Washington DC
+stateNames <- data.frame(stateName=c(state.name,"Washington DC"),State=c(state.abb,"DC"))
+
+
+# add the State Name to the Breweries Data Frame
+breweries <- merge(breweries,stateNames,by="State", all=TRUE)
+
+
 ```
 # Questions of Interest
 
 ##1. How many breweries are present in each state?
+```{r, CountBreweries}
+# Count Breweries per State
+
+countBrewByState <- table(breweries$stateName)
+countBrewByState <- as.data.frame(countBrewByState)
+colnames(countBrewByState)=c("stateName","BreweriesCount")
+countBrewByState
+```
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
 
-```{r, Merge Data}
+```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
 m1 <- merge(beers,breweries,by="Brew_ID")
 
-#First 6 observations from m1
+#Table with the first 6 observations from m1 (merged data)
 head(m1)
 
-#Last 6 observations from m1
+#Talble with the last 6 observations from m1 (merged data)
 tail(m1)
 
 ```
@@ -56,7 +77,7 @@ tail(m1)
 
 ##6. Summary statistics for the ABV variable.
 
-##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship and EXPLAIN your answer.
+##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship heand EXPLAIN your answer.
 
 #Conclusion
 --Conclusion--

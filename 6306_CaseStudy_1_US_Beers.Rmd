@@ -20,12 +20,28 @@ knitr::opts_chunk$set(echo = TRUE)
 beers <- read.csv("Beers.csv")
 breweries <-read.csv("Breweries.csv")
 
+#Rename Brewery_id to Brew_id in beers data, same as in breweries in order to merge data sets
+colnames(beers)[5] <- c("Brew_ID")
+
 ```
 # Questions of Interest
 
 ##1. How many breweries are present in each state?
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
+
+```{r, Merge Data}
+#Merge beers and breweries data together
+colnames(beers)
+m1 <- merge(beers,breweries,by="Brew_ID")
+
+#First 6 observations from m1
+head(m1)
+
+#Last 6 observations from m1
+tail(m1)
+
+```
 
 ##3. Report the number of NA's in each column.
 
@@ -41,3 +57,4 @@ breweries <-read.csv("Breweries.csv")
 --Conclusion--
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+t

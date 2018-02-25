@@ -15,8 +15,32 @@ knitr::opts_chunk$set(echo = TRUE)
 --Intro--
 
 ## Data Description
+The Beers dataset contains a list of 2410 US craft beers and Breweries dataset contains 558 US
+breweries. The datasets descriptions are as follows.
 
-### Data Load
+
+### Beers.csv:
+
+Field Name | Field Description
+-----------|--------------------
+Name:      | Name of the beer.
+Beer ID:   | Unique identier of the beer.
+ABV:       | Alcohol by volume of the beer.
+IBU:       | International Bitterness Units of the beer.
+Brewery ID:| Brewery id associated with the beer.
+Style:     | Style of the beer.
+Ounces:    | Ounces of beer.
+
+
+### Breweries.csv:
+Field Name | Field Description
+-----------|--------------------
+Brew ID:   | Unique identier of the brewery.
+Name:      | Name of the brewery.
+City:      | City where the brewery is located.
+State:     | U.S. State where the brewery is located.
+
+### Data Cleanup
 ```{r, Data Load}
 #Read Data into Variables
 beers <- read.csv("Beers.csv")
@@ -31,6 +55,16 @@ colnames(breweries)[2] <- c("brewerCompany")
 #Rename Brewery_id to Brew_id in beers data, same as in breweries in order to merge data sets
 colnames(beers)[5] <- c("Brew_ID")
 
+#Select only Beers regarless of the Beer_ID or bottled Presentation. This will only give all produced beers.
+beersOnly <- beers[c(-2,-7)]
+
+#Review duplicate Beers. There are 78 records showing extra records for existing beers.
+beersOnlyDup <- beersOnly[duplicated(beersOnly),]
+
+#Select Unique Beers after Validating that all the Duplication are valid. However, there are still seem to be duplicates of the beers, due to the year that was produced. For this exercise beers produced on different years will be consider different, and not duplicated.
+# A unique beer is unique on beerName, ABV, IBU, Brewery, and Style. The Beer_ID and the Ounces were removed.
+uniqueBeers <- beersOnly[!duplicated(beersOnly),]
+
 # Trim the leading white-spce from the State
 breweries$State <- trimws(breweries$State)
 
@@ -41,6 +75,17 @@ stateNames <- data.frame(stateName=c(state.name,"Washington DC"),State=c(state.a
 # add the State Name to the Breweries Data Frame
 breweries <- merge(breweries,stateNames,by="State", all=TRUE)
 
+# There are breweries that have more than one plant within the state. And the production of the beers would be split into those breweries. Therefore, we will have unique breweries per state for counting porpuses.
+uniqueBreweries <- breweries[!duplicated(breweries[c(3,5)]),]
+
+# There is a brewery that looks to be a bad entry. This will be deleted and assing all the beers produced at this location to the correct location. 
+# This brewery company is "Balckrocks Brewery" (Brew_id=96) and there is an entry in Masachussets where there is no such town, and it will be removed. All the beers poduced at this location will be assigned to the Minnesota location.
+uniqueBreweries <- uniqueBreweries[!uniqueBreweries$Brew_ID==96,]
+breweries <- breweries[!breweries$Brew_ID == 96,]
+
+# Transfer Beer production from Brew_ID=96 to Brew_ID=13
+uniqueBeers$Brew_ID[uniqueBeers$Brew_ID == 96] <- 13 
+
 
 ```
 # Questions of Interest
@@ -49,7 +94,7 @@ breweries <- merge(breweries,stateNames,by="State", all=TRUE)
 ```{r, CountBreweries}
 # Count Breweries per State
 
-countBrewByState <- table(breweries$stateName)
+countBrewByState <- table(uniqueBreweries$stateName)
 countBrewByState <- as.data.frame(countBrewByState)
 colnames(countBrewByState)=c("stateName","BreweriesCount")
 countBrewByState
@@ -59,7 +104,7 @@ countBrewByState
 
 ```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
-m1 <- merge(beers,breweries,by="Brew_ID")
+m1 <- merge(uniqueBeers,breweries,by="Brew_ID")
 
 #Table with the first 6 observations from m1 (merged data)
 head(m1)
@@ -70,17 +115,73 @@ tail(m1)
 ```
 
 ##3. Report the number of NA's in each column.
+``` {r, NACountCalculation}
+# This will count NA per field
+NACount <- sapply(m1,function(x) sum(is.na(x)))
+NACount <- as.data.frame(NACount)
+colnames(NACount)=c("CountOfNAs")
+NACount
+
+
+```
 
 ##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+```{r, medianCalculation}
+# ABV Median Calculation per State and Column Renames. NA Values are ignored.
+med.st.abv<-aggregate(m1$ABV~m1$State,m1,median,na.rm=T)
+colnames(med.st.abv)<- c("State","ABV")
+
+# IBU Median Calculation per State and Column Renames. NA Values are ignored.
+med.st.ibu<-aggregate(m1$IBU~m1$State,m1,median,na.rm=T)
+colnames(med.st.ibu)<- c("State","IBU")
+
+# ABV Median per State 
+med.st.abv
+
+# IBU Median per State
+med.st.ibu
+
+library(ggplot2)
+
+##Histograms, Raw Data
+
+ggplot(data=med.st.abv, aes(x=med.st.abv$State,y=med.st.abv$ABV)) + geom_bar(stat="identity")
+ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU)) + geom_bar(stat="identity")
+
+####NOTE SD DOES NOT SHOW UP IN IBU BECAUSE OF MISSING DATA, WHAT DO WE DO WITH THIS???
+
+
+```
+
 
 ##5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+```{r MaxABV}
+# Find the State with the maximum ABV beer
+z<-which.max(m1$ABV)
+
+paste(m1$stateName[z], "has the highest ABV with a Max ABV of:", m1$ABV[z])
+
+# Find the State with the highest bitterness (IBU) beer
+y<-which.max(m1$IBU)
+paste(m1$stateName[y], "has the highest IBU with a Max IBU of:", m1$IBU[y])
+
+
+```
 
 ##6. Summary statistics for the ABV variable.
-
+``` {r, ABVSummary}
+# Summary for ABV Values
+summary(m1$ABV)
+```
 ##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship heand EXPLAIN your answer.
+``` {r Relationship}
+
+# Scatter plot for bitternes vs alcohol content
+ggplot(data=m1,aes(x=m1$IBU,y=m1$ABV)) + geom_point() + geom_smooth(method="lm") + xlab("Bitternes") + ylab("Alcohol Content")
+
+```
 
 #Conclusion
+
 --Conclusion--
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-t

@@ -177,7 +177,7 @@ summary(m1$ABV)
 ``` {r Relationship}
 
 # Scatter plot for bitternes vs alcohol content
-ggplot(data=m1,aes(x=m1$IBU,y=m1$ABV)) + geom_point() + geom_smooth(method="lm") + xlab("Bitternes") + ylab("Alcohol Content")
+ggplot(data=m1,aes(x=m1$IBU,y=m1$ABV)) + geom_point() + geom_smooth(method="lm") + xlab("Bitternes") + ylab("Alcohol Content") + ggtitle("Beer Bitternes vs Alcohol Content")
 
 ```
 

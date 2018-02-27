@@ -1,7 +1,8 @@
 ---
-title: "US Beers and Breweries"
+title: "BeerVana Consulting"
 author: "Christopher Morgan, Dmitry Andreev, & Eduardo Cantu"
-date: "February 17, 2018"
+subtitle: "US Beers and Breweries"
+date: "February 28, 2018"
 output: 
   html_document:
     df_print: paged
@@ -12,9 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
---Intro--
+As we enter 2018, with nearly 6,000 microbreweries registered in the U.S., it is safe to say that craft brews are all the craze and they're here to stay. When was the last you can remember reaching for a Miller Light after leaving college? Sure, this could be due to the fact you can finally afford to pay more than $1.50 for a canned beer and are starting to get curious about trying something new. At BeerVana Consulting we believe that the real driving force behind this trend is the unmatched variety of flavors that you simply can't find with the Budweisers, Coors, and Heinekens of the world. Not only are there an endless array of hole-in-the-wall breweries popping up on every town corner but also the ever-increasing competition to make new brews that cater to this new class of beer snob elites has never been fiercer. Lucky for them, we have narrowed down the main preferences for each state. So for any new players looking to enter the craft brewery game, rest assured that Beervana is taking out the guesswork for you and your next brew! The goal of this report is to simplify the large sea of information currently available for some of the most popular craft breweries in each state and the most popular canned beers they're putting out. We also dive into a rather surprising relationship that exists between the ABV (Alcohol by Volume) and IBU (International Bitterness Unit) for these beers.
 
 ## Data Description
+
 
 ### Data Load
 ```{r, Data Load}

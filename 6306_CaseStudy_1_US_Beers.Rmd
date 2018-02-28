@@ -24,7 +24,7 @@ breweries. The datasets descriptions are as follows.
 Field Name | Field Description
 -----------|--------------------
 Name:      | Name of the beer.
-Beer ID:   | Unique identier of the beer.
+Beer ID:   | Unique identfier of the beer.
 ABV:       | Alcohol by volume of the beer.
 IBU:       | International Bitterness Units of the beer.
 Brewery ID:| Brewery id associated with the beer.
@@ -35,7 +35,7 @@ Ounces:    | Ounces of beer.
 ### Breweries.csv:
 Field Name | Field Description
 -----------|--------------------
-Brew ID:   | Unique identier of the brewery.
+Brew ID:   | Unique identfier of the brewery.
 Name:      | Name of the brewery.
 City:      | City where the brewery is located.
 State:     | U.S. State where the brewery is located.
@@ -105,7 +105,7 @@ countBrewByState
 ```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
 m1 <- merge(uniqueBeers,breweries,by="Brew_ID")
-
+m1$IBU <- m1$IBU * 100
 #Table with the first 6 observations from m1 (merged data)
 head(m1)
 
@@ -145,8 +145,8 @@ library(ggplot2)
 
 ##Histograms, Raw Data
 
-ggplot(data=med.st.abv, aes(x=med.st.abv$State,y=med.st.abv$ABV)) + geom_bar(stat="identity")
-ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU)) + geom_bar(stat="identity")
+ggplot(data=med.st.abv, aes(x=med.st.abv$State,y=med.st.abv$ABV)) + geom_bar(stat="identity") + coord_flip()
+ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU)) + geom_bar(stat="identity") + coord_flip()
 
 ####NOTE SD DOES NOT SHOW UP IN IBU BECAUSE OF MISSING DATA, WHAT DO WE DO WITH THIS???
 
@@ -177,7 +177,7 @@ summary(m1$ABV)
 ``` {r Relationship}
 
 # Scatter plot for bitternes vs alcohol content
-ggplot(data=m1,aes(x=m1$IBU,y=m1$ABV)) + geom_point() + geom_smooth(method="lm") + xlab("Bitternes") + ylab("Alcohol Content") + ggtitle("Beer Bitternes vs Alcohol Content")
+ggplot(data=m1,aes(x=m1$ABV*100,y=m1$IBU)) + geom_point() + geom_smooth(method="lm") + xlab("Alcohol Content") + ylab("Bitternes") + ggtitle("Beer Bitternes vs Alcohol Content")
 
 ```
 

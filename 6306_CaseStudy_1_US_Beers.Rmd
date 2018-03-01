@@ -105,7 +105,7 @@ countBrewByState
 ```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
 m1 <- merge(uniqueBeers,breweries,by="Brew_ID")
-m1$IBU <- m1$IBU * 100
+
 #Table with the first 6 observations from m1 (merged data)
 head(m1)
 

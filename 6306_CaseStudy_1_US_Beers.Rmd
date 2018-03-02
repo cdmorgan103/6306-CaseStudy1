@@ -12,12 +12,49 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
---Intro--
+As we enter 2018, with nearly 6,000 microbreweries registered in the U.S., it is safe to say that craft brews are all the craze and they're here to stay. When was the last you can remember reaching for a Miller Light after leaving college? Sure, this could be due to the fact you can finally afford to pay more than $1.50 for a canned beer and are starting to get curious about trying something new. At BeerVana Consulting we believe that the real driving force behind this trend is the unmatched variety of flavors that you simply can't find with the Budweisers, Coors, and Heinekens of the world. Not only are there an endless array of hole-in-the-wall breweries popping up on every town corner but also the ever-increasing competition to make new brews that cater to this new class of beer snob elites has never been fiercer. Lucky for them, we have narrowed down the main preferences for each state. So for any new players looking to enter the craft brewery game, rest assured that Beervana is taking out the guesswork for you and your next brew! The goal of this report is to simplify the large sea of information currently available for some of the most popular craft breweries in each state and the most popular canned beers they're putting out. We also dive into a rather surprising relationship that exists between the ABV (Alcohol by Volume) and IBU (International Bitterness Unit) for these beers.
 
 ## Data Description
+The datasets being used for this report was sourced from the CraftCans website. It only contains data for canned beers from craft breweries in the United States. It is not clear from the website if this dataset reports every single canned beer brewed in the US or not. There are also several attributes of the listed beers that have missing information so for this reason we will consider this dataset to be a sample that may contain biases.
+
+The two datasets that will be referred and used throughout this report are summarized below:
+
+1. Beers.csv
+    + Name: Name of the beer.
+    + Beer ID: Unique identifier of the beer.
+    + ABV: Alcohol by volume of the beer.
+    + IBU: International Bitterness Units of the beer.
+    + Brewery ID: Brewery id associated with the beer.
+    + Style: Style of the beer.
+    + Ounces: Ounces of beer.
+
+2. Breweries.csv
+    + Brew ID: Unique identifier of the brewery.
+    + Name: Name of the brewery.
+    + City: City where the brewery is located.
+    + State: U.S. State where the brewery is located.
+
+
+### Beers.csv:
+
+1. Beers.csv
+    + Name: Name of the beer.
+    + Beer ID: Unique identifier of the beer.
+    + ABV: Alcohol by volume of the beer.
+    + IBU: International Bitterness Units of the beer.
+    + Brewery ID: Brewery id associated with the beer.
+    + Style: Style of the beer.
+    + Ounces: Ounces of beer.
+
+2. Breweries.csv
+    + Brew ID: Unique identifier of the brewery.
+    + Name: Name of the brewery.
+    + City: City where the brewery is located.
+    + State: U.S. State where the brewery is located.
 
 ### Data Load
-```{r, Data Load}
+Our first set of code loads in the data, does some early data organization for mergin the data, and adds in some basic fields for state tracking
+```{r, Data Load, results='hide' }
 #Read Data into Variables
 beers <- read.csv("Beers.csv")
 breweries <-read.csv("Breweries.csv")
@@ -37,29 +74,64 @@ breweries$State <- trimws(breweries$State)
 #Create State Names data frame, inlcuding Washington DC
 stateNames <- data.frame(stateName=c(state.name,"Washington DC"),State=c(state.abb,"DC"))
 
-
 # add the State Name to the Breweries Data Frame
 breweries <- merge(breweries,stateNames,by="State", all=TRUE)
 
 
+
 ```
+
+###Data Cleaning for Breweries 
+Here we beigin the process of cleaning our brewrery data. We first trim out white space and lower all text in the brewery data to prevent false positives when searching for duplicates. Next we perform a duplicate analysis that eliminates likely duplicate breweries by searching for rows of data that have the first two words matching in brewery name and the brewery data shares the same city.
+```{r, Breweries cleaning, results='hide'}
+
+####this area cleans the brewrery data of most likely duplicate entries####
+#loads stringr funtion
+library(stringr)
+#creates work area for brewries data with b df
+b<-breweries
+#trims b of white space and converts to lowercase
+sapply(b,FUN = trimws)
+sapply(b,FUN = tolower)
+#pulls first two words from brewery data to eliminate potential duplicates and creates it as a column in b
+b$TwoWords<-word(b$brewerCompany,1,2,sep=" ")
+#eliminates duplicate data where duplicate brewries share the same name and are in the same city
+uniqueBreweries <- b[!duplicated(b[,c("TwoWords", "City")]),]
+```
+
+
 # Questions of Interest
 
 ##1. How many breweries are present in each state?
+To obtain a count of breweries by state, we use some of our previous work in the cleaning phase to perform a count by state calculation
 ```{r, CountBreweries}
 # Count Breweries per State
 
-countBrewByState <- table(breweries$stateName)
+countBrewByState <- table(uniqueBreweries$stateName)
 countBrewByState <- as.data.frame(countBrewByState)
 colnames(countBrewByState)=c("stateName","BreweriesCount")
 countBrewByState
 ```
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
-
+Here we merge the raw beer and brewery data. We have intentionally used the raw brewery data here since it ensure all beers are present for the future analysis. Analysis that requires unique breweries can be called using early cleaned datasets
 ```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
 m1 <- merge(beers,breweries,by="Brew_ID")
+
+```
+
+with the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
+Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed.
+
+```{r, Clean Merged Data, cols.print=11}
+
+#performs search for parenthesis values, removes them from a nondestructive column for beers
+m1$beerNameNoY<-gsub("[:(:].*[:):]","",m1$beerName)
+#trims white space around newly trimmed data for beers
+m1$beerNameNoY<-trimws(m1$beerNameNoY)
+#eliminates duplicates for beers
+m1 <- m1[!duplicated(m1[,c("beerNameNoY","brewerCompany","ABV","IBU","Style")]),]
 
 #Table with the first 6 observations from m1 (merged data)
 head(m1)
@@ -69,18 +141,90 @@ tail(m1)
 
 ```
 
+
 ##3. Report the number of NA's in each column.
+utilizing our joined data, we simply sum NA's and print for each column
+``` {r, NACountCalculation}
+# This will count NA per field
+NACount <- sapply(m1,function(x) sum(is.na(x)))
+NACount <- as.data.frame(NACount)
+colnames(NACount)=c("CountOfNAs")
+NACount
+
+
+```
 
 ##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+Median alcohol content is computed using our joined dataset and then printed using a ggplot funciton.
+```{r, medianCalculation, fig.width=12,fig.height=6}
+# ABV Median Calculation per State and Column Renames. NA Values are ignored.
+med.st.abv<-aggregate(m1$ABV~m1$State,m1,median,na.rm=T)
+colnames(med.st.abv)<- c("State","ABV")
+
+# IBU Median Calculation per State and Column Renames. NA Values are ignored.
+med.st.ibu<-aggregate(m1$IBU~m1$State,m1,median,na.rm=T)
+colnames(med.st.ibu)<- c("State","IBU")
+#NA for SD binded back in as 0 value
+med.st.ibu<-rbind(med.st.ibu,c("SD","0"))
+
+# ABV Median per State 
+med.st.abv
+
+# IBU Median per State
+med.st.ibu
+
+library(ggplot2)
+
+##Histograms, Raw Data
+
+ggplot(data=med.st.abv, aes(x=med.st.abv$State,y=med.st.abv$ABV, fill=med.st.abv$ABV)) + 
+  geom_bar(stat="identity") + 
+  ggtitle("Median ABV by state") +
+  xlab("State") + ylab("Median ABV") +guides(fill=FALSE) 
+
+ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU, fill=med.st.ibu$IBU)) + geom_bar(stat = "identity") + 
+  ggtitle("Median IBU by state",
+  subtitle = "SD median can not be calculated due to missing IBU data and is represented as 0") +
+  xlab("State") + ylab("Median IBU") +guides(fill=FALSE)
+
+```
+
 
 ##5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+Next we calculate the max ABV and IBU and print the results
+```{r MaxABV}
+# Find the State with the maximum ABV beer
+z<-which.max(m1$ABV)
+
+paste(m1$stateName[z], "has the highest ABV with a Max ABV of:", m1$ABV[z])
+
+# Find the State with the highest bitterness (IBU) beer
+y<-which.max(m1$IBU)
+paste(m1$stateName[y], "has the highest IBU with a Max IBU of:", m1$IBU[y])
+
+
+```
 
 ##6. Summary statistics for the ABV variable.
-
+refrenecing our joined dataset, we can print summary statistics for ABV
+``` {r, ABVSummary}
+# Summary for ABV Values
+summary(m1$ABV)
+```
 ##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship heand EXPLAIN your answer.
+At this point we can use ggplot with several functions to plot ibu and abv with a level of formatting to make our results easier to interpret
+``` {r Relationship}
+
+ggplot(data=m1,aes(x=m1$ABV,y=m1$IBU,colour=m1$IBU)) + geom_point() + geom_smooth(method="lm", formula=y~x) +
+  xlab("Alcohol by volume") + ylab("Bitternes") + ggtitle("Beer Bitternes vs Alcohol Content") + 
+  scale_colour_gradientn(colours = rainbow(10)) + theme(legend.title=element_blank())
+
+mod = lm(m1$IBU ~ m1$ABV, data = m1)
+summary(mod) 
+
+```
 
 #Conclusion
+
 --Conclusion--
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-t

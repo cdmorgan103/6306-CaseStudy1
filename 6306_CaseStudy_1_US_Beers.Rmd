@@ -1,6 +1,6 @@
 ---
 title: "US Beers and Breweries"
-author: "Christopher Morgan, Dmitry Andreev, & Eduardo Cantu"
+author: "BeerVana Consulting Group - Christopher Morgan, Dmitry Andreev, & Eduardo Cantu"
 date: "February 17, 2018"
 output: 
   html_document:
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 As we enter 2018, with nearly 6,000 microbreweries registered in the U.S., it is safe to say that craft brews are all the craze and they're here to stay. When was the last you can remember reaching for a Miller Light after leaving college? Sure, this could be due to the fact you can finally afford to pay more than $1.50 for a canned beer and are starting to get curious about trying something new. At BeerVana Consulting we believe that the real driving force behind this trend is the unmatched variety of flavors that you simply can't find with the Budweisers, Coors, and Heinekens of the world. Not only are there an endless array of hole-in-the-wall breweries popping up on every town corner but also the ever-increasing competition to make new brews that cater to this new class of beer snob elites has never been fiercer. Lucky for them, we have narrowed down the main preferences for each state. So for any new players looking to enter the craft brewery game, rest assured that Beervana is taking out the guesswork for you and your next brew! The goal of this report is to simplify the large sea of information currently available for some of the most popular craft breweries in each state and the most popular canned beers they're putting out. We also dive into a rather surprising relationship that exists between the ABV (Alcohol by Volume) and IBU (International Bitterness Unit) for these beers.
 
 ## Data Description
-The datasets being used for this report was sourced from the CraftCans website. It only contains data for canned beers from craft breweries in the United States. It is not clear from the website if this dataset reports every single canned beer brewed in the US or not. There are also several attributes of the listed beers that have missing information so for this reason we will consider this dataset to be a sample that may contain biases.
+The datasets being used for this report were sourced from the CraftCans website. It only contains data for canned beers from craft breweries in the United States. It is not clear from the website if this dataset reports every single canned beer brewed in the US or not. There are also several attributes of the listed beers that have missing information so for this reason we will consider this dataset to be a sample that may contain biases.
 
 The two datasets that will be referred and used throughout this report are summarized below:
 
@@ -66,9 +66,6 @@ stateNames <- data.frame(stateName=c(state.name,"Washington DC"),State=c(state.a
 
 # add the State Name to the Breweries Data Frame
 breweries <- merge(breweries,stateNames,by="State", all=TRUE)
-
-
-
 ```
 
 ###Data Cleaning for Breweries 
@@ -94,26 +91,29 @@ uniqueBreweries <- b[!duplicated(b[,c("TwoWords", "City")]),]
 
 ##1. How many breweries are present in each state?
 To obtain a count of breweries by state, we use some of our previous work in the cleaning phase to perform a count by state calculation.  
-The number of breweries per state ranges from 1 to 47 breweries. Below is the list of states order from the highest to the lowest numbers of breweries in it. Colorado is the state with the most brewer companies. On the other hand,  North Dakota, South Dakota, Washington DC, and West Virginia are the states with only one craft brewer company.
+The number of breweries per state ranges from 1 to 47 breweries. Below is the list of states order from the highest to the lowest numbers of breweries in it. Colorado is the state with the most brewer companies. On the other hand,  North Dakota, South Dakota, Washington DC, and West Virginia are the states with only one craft brewer company.  
 ```{r, CountBreweries}
 #Plot Library
 library(ggplot2)
-# Count Breweries per State
 
+# Count Breweries per State
 countBrewByState <- table(uniqueBreweries$stateName)
 countBrewByState <- as.data.frame(countBrewByState)
 colnames(countBrewByState)=c("stateName","BreweriesCount")
 sort.countBState <- countBrewByState[order(-countBrewByState$BreweriesCount),]
 sort.countBState
 ```
-The plot below shows the number of states versus the count of breweries in it. The most common number of breweries per state is four, with 6 states. Also, there are 19 (38%) states have 10 or more breweries.
+The plot below shows the number of states versus the count of breweries in it. The most common number of breweries per state is four, with 6 states. Also, there are 19 (38%) states have 10 or more breweries. 
 ```{r, plot distribution}
 #Create frequncy per Number of Breweries and bar Plot
 statehis.df <- as.data.frame(table(countBrewByState$BreweriesCount))
 ggplot(data=statehis.df, aes(x=statehis.df$Var1,y=statehis.df$Freq)) + 
   geom_bar(stat="identity") + 
   ggtitle("Breweries Distribution") + xlab("Number of Breweries") + ylab("Number of States")
+
 ```
+
+It is important to note that this dataset is only a sample containing 558 out of over 6,000 craft breweries registered in the US. After conducting preliminary research on several online databases such as BreweryDB and Untappd, Beervana Consulting Group feels that this sample provides a good starting point for understanding the geographic distribution of craft breweries around the country. Another point to note is that Washington DC was treated as a separate state which is the reason for having a total of 51 states in the table above as well as the plot below. Rather than including DC within Virginia or Maryland and overestimating their brewery count, we decided to provide some visibility to DC in case there was a specific interest to further research the area.
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
 Here we merge the raw beer and brewery data. We have intentionally used the raw brewery data here since it ensure all beers are present for the future analysis. Analysis that requires unique breweries can be called using early cleaned datasets.
@@ -123,8 +123,8 @@ m1 <- merge(beers,breweries,by="Brew_ID")
 
 ```
 
-With the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
-Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed. The final numbers reveal 2,410 unique crafted beers by all the microbreweries in the US. The two lists below represents the first 6 observations and last 6 observation respectivaly for the combined dataset.
+With the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all possibilities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
+Duplicate data must share the same beername, brewery name, abv, ibu, and style to be removed. The final numbers reveal 2,410 unique crafted beers by  microbreweries in the US. The two lists below represent the first 6 observations and last 6 observation respectively for the combined dataset.
 
 ```{r, Clean Merged Data, cols.print=11}
 
@@ -138,14 +138,15 @@ m1 <- m1[!duplicated(m1[,c("beerNameNoY","brewerCompany","ABV","IBU","Style")]),
 #Table with the first 6 observations from m1 (merged data)
 head(m1)
 
-#Talble with the last 6 observations from m1 (merged data)
+#Table with the last 6 observations from m1 (merged data)
 tail(m1)
 
 ```
 
+As you scroll along the columns of each list, you will notice that there are now numerous attributes included in the merged dataset to describe each beer. You can begin to get a good idea of which brewery, city, and state the beer orginated from along with other details such as the size, style, alcohol content, and how bitter it is. Clearly, the merged dataset proves to be more valuable in exploring and understanding the distribution of the US craft beers and breweries that they come from along with any underlying relationships that exist within.
 
 ##3. Report the number of NA's in each column.
-One of the biggest challanges is empty of missing data in the fields. By utilizing our joined data, we simply sum NA's and print for each column. This provides the number of empty values per column or field in our dataset. This allows to asses how good is the data, and account for any problem that may cause.
+One of our biggest challenges with this dataset is understanding how best to handle any missing data. To begin with, we simply summarized the number of NA's or missing values for each column of the merged dataset. This way we can evaluate the quality of the data and try to account for any issues this may result in during analysis. 
 ``` {r, NACountCalculation, rows.print=13}
 # This will count NA per field
 NACount <- sapply(m1,function(x) sum(is.na(x)))
@@ -155,12 +156,12 @@ NACount
 
 
 ```
-The "IBU" field has 966 empty values, this is 40% of our dataset. It is our recomendation to research for these values and try to fill it in before making any desision on it. In contrast we have the "ABV" with 62 empty values, which represent 2.5% of our dataset, this number should not skew our data analysis for ABV.
+The "IBU" field has 966 empty values which is 40% of our dataset. BeerVana Consulting strongly recommends that we further research these values and try to account for them prior to making any decisions. In contrast we have the "ABV" with 62 empty values, which represent 2.5% of our dataset, this number should not skew our data analysis for ABV.
 
 ##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
-Median alcohol content is computed using our joined dataset and then printed using a ggplot funciton. The results show that the median Alcohol By Volume ranges from 4% to 6.25% from state to state.  The 2.5% missing values on ABV are not enough to affect the outcome of these median values.
+Median alcohol content is computed using our merged dataset and then printed using a built-in function from the ggplot package. The results show that the median ABV (Alcohol By Volume) ranges from 4% to 6.25% from state to state. The 2.5% missing values on ABV are not enough to affect the outcome of these median values.
 
-However, for the IBU median calculation may not be accurate due to the 40% missing values in the dataset. Even though the median can be calculated, this calcuation may differ enough from the original population. The state's median ranges for IBU are from 0 to 61. States like South Dakota with 0 is one of the states that is missing all the IBU data. There may be states that have enough missing IBU values to change their median outcome.  
+However, the IBU median calculation may not be accurate due to the previously mentioned 40% missing values in the dataset. Even though the median can be calculated, this may somewhat differ from the overall population of 6,000 US craft breweries. The states' median IBU values range anywhere from 0 to 61. We did notice that South Dakota has a calculated median IBU of 0 because it is missing all the IBU data. There may be states that have enough missing IBU values to change their median outcome.
 
 ```{r, medianCalculation, fig.width=12,fig.height=6}
 # ABV Median Calculation per State and Column Renames. NA Values are ignored.
@@ -191,7 +192,7 @@ med.st.ibu
 
 ##Histograms, Raw Data
 
-ggplot(data=med.st.abv, aes(x=med.st.abv$State,y=med.st.abv$ABV, fill=med.st.abv$ABV)) + 
+ggplot(data=med.st.abv, aes(x=med.st.abv$State, y=med.st.abv$ABV, fill=med.st.abv$ABV)) + 
   geom_bar(stat="identity") + 
   ggtitle("Median ABV by state") +
   xlab("State") + ylab("Median ABV") +guides(fill=FALSE) 
@@ -203,10 +204,9 @@ ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU, fill=med.st.ibu
 
 ```
 
-
 ##5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
-Next we calculate the max ABV and IBU and print the results.
-Colorado has the brewery that produces the higest Alcohol By Volume beer. Even though the 2.5% missing data may take Colorado's claim of having the highest ABV beer, the probability is low. However, we cannot say the same for the IBU first place. Oregon,the state with the highest IBU beer title, may not be safe. With 40% missing data, there may be other states out there with beers with an IBU larger than the one in Oregon. 
+Next, we calculated the maximum ABV and IBU and printed the results for each state.
+Colorado has the brewery that produces the highest Alcohol By Volume beer. Even though the 2.5% missing data may take Colorado's claim of having the highest ABV beer, the probability is low. However, we cannot say the same for the IBU first place. Oregon, the state with the highest IBU beer title, may not be a valid conclusion. With 40% missing data, there may be other states out there with beers that have an IBU far higher than what we found in this case for Oregon.
 ```{r MaxABV}
 # Change the ABV Scale to percent
 m1$ABV<- m1$ABV*100
@@ -223,20 +223,20 @@ paste(m1$stateName[y], "has the highest IBU with a Max IBU of:", m1$IBU[y])
 ```
 
 ##6. Summary statistics for the ABV variable.
-Refrenecing our joined dataset, we can print summary statistics for ABV. 
-From the summary statistics can be infered that it is probable that the ABV variable follows a normal distribution becuase the median and the mean are very close. There is a slight rigth skew to the data, but nothing that will indicate an extreme departure from normality. One thing to notice is that, 75 % of all the beers have a 5% ABV or more. However, the intequartely distance is only 1.8 %. Meaing that 50 % of the data is between 5 and 6.8% of ABV.
+Referencing our joined dataset, we can print summary statistics for ABV. 
+From the summary statistics, it can be inferred that the ABV of our craft beers dataset follows a normal distribution because the median and the mean values are very close. There is a slight right skew to the data, but nothing that will indicate an extreme departure from normality. One thing to notice is that 75% of all the beers have a 5% ABV or more. However, the interquartile distance is only 1.8% suggesting that 50% of the data is bounded between 5% and 6.8% ABV.  
+You might notice that the number of NA's for the ABV variable is shown in the output below. It is important to remember that these missing values are not included in the summary statistics but as previously mentioned, we feel that this only accounts for 2.5% of the overall dataset and should have influence the statistics of interest.
+
 ``` {r, ABVSummary}
 # Summary for ABV Values
 summary(m1$ABV)
 ```
-##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship heand EXPLAIN your answer.
 
+##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship and explain your answer.
+The scatterplot below provides visual evidence for a weak positive linear relationship between the alcohol content and the IBU values (R-Squared 0.44), meaning that 44% of the variation in the IBU of craft beers is explained by the Alcohol By Volume variable. This means that there are numerous other factors that may affect the IBU but are not accounted for in this linear regression.
+A simple way to define this relationship is that for every one percent increase in the ABV value, there is an increase of 12.2 units in the IBU average (pvalue < 0.001).
 
-
-There is visual evidence that there is a positive linear relation between the alcohol content and the IBU values (R-Squared 0.44), meaning that 44% of the IBU variation is explained by the Alcohol By Volume variable. Therefore, other factors may affect the IBU as well and they are not acounted in this regression.
-For every one percent increase in ABV value, there is an increase of 12.2 units in the IBU average (pvalue < 0.001).
-
-There is a caveat on the regresion analysis that is the 40 % missing data in IBU. This could change the regresion coeficients since currently there is no way to know where that 40% falls in IBU. Take this regression analysis with this in mind. 
+There is a caveat to keep in mind for this regression analysis that 40% of the IBU data is missing. This could be strongly influencing the regression coefficients since currently there is no way of knowing exactly where that 40% falls within the overall spectrum of IBU values for all craft beers in the US. Please keep this in mind when looking at the regression analysis presented below.
 
 ``` {r Relationship}
 
@@ -249,7 +249,6 @@ summary(mod)
 
 ```
 
-#Conclusion
+# Conclusion
 
---Conclusion--
 

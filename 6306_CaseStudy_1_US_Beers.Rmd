@@ -158,17 +158,28 @@ NACount
 The "IBU" field has 966 empty values, this is 40% of our dataset. It is our recomendation to research for these values and try to fill it in before making any desision on it. In contrast we have the "ABV" with 62 empty values, which represent 2.5% of our dataset, this number should not skew our data analysis for ABV.
 
 ##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
-Median alcohol content is computed using our joined dataset and then printed using a ggplot funciton.
+Median alcohol content is computed using our joined dataset and then printed using a ggplot funciton. The results show that the median Alcohol By Volume ranges from 4% to 6.25% from state to state.  The 2.5% missing values on ABV are not enough to affect the outcome of these median values.
+
+However, for the IBU median calculation may not be accurate due to the 40% missing values in the dataset. Even though the median can be calculated, this calcuation may differ enough from the original population. The state's median ranges for IBU are from 0 to 61. States like South Dakota with 0 is one of the states that is missing all the IBU data. There may be states that have enough missing IBU values to change their median outcome.  
+
 ```{r, medianCalculation, fig.width=12,fig.height=6}
 # ABV Median Calculation per State and Column Renames. NA Values are ignored.
 med.st.abv<-aggregate(m1$ABV~m1$State,m1,median,na.rm=T)
 colnames(med.st.abv)<- c("State","ABV")
-
+# Sort the data for ABV
+med.st.abv <- med.st.abv[order(med.st.abv$ABV),]
+# Change the scale for the ABV to percentage
+med.st.abv$ABV <- med.st.abv$ABV*100
 # IBU Median Calculation per State and Column Renames. NA Values are ignored.
 med.st.ibu<-aggregate(m1$IBU~m1$State,m1,median,na.rm=T)
 colnames(med.st.ibu)<- c("State","IBU")
+
+
 #NA for SD binded back in as 0 value
 med.st.ibu<-rbind(med.st.ibu,c("SD","0"))
+
+# Sort the data for IBU
+med.st.ibu <- med.st.ibu[order(med.st.ibu$IBU),]
 
 # ABV Median per State 
 med.st.abv
@@ -194,8 +205,11 @@ ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU, fill=med.st.ibu
 
 
 ##5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
-Next we calculate the max ABV and IBU and print the results
+Next we calculate the max ABV and IBU and print the results.
+Colorado has the brewery that produces the higest Alcohol By Volume beer. Even though the 2.5% missing data may take Colorado's claim of having the highest ABV beer, the probability is low. However, we cannot say the same for the IBU first place. Oregon,the state with the highest IBU beer title, may not be safe. With 40% missing data, there may be other states out there with beers with an IBU larger than the one in Oregon. 
 ```{r MaxABV}
+# Change the ABV Scale to percent
+m1$ABV<- m1$ABV*100
 # Find the State with the maximum ABV beer
 z<-which.max(m1$ABV)
 

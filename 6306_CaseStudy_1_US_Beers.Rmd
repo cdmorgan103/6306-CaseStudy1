@@ -116,14 +116,14 @@ ggplot(data=statehis.df, aes(x=statehis.df$Var1,y=statehis.df$Freq)) +
 ```
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
-Here we merge the raw beer and brewery data. We have intentionally used the raw brewery data here since it ensure all beers are present for the future analysis. Analysis that requires unique breweries can be called using early cleaned datasets
+Here we merge the raw beer and brewery data. We have intentionally used the raw brewery data here since it ensure all beers are present for the future analysis. Analysis that requires unique breweries can be called using early cleaned datasets.
 ```{r, Merge Data, cols.print=11}
 #Merge beers and breweries data together
 m1 <- merge(beers,breweries,by="Brew_ID")
 
 ```
 
-with the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
+With the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
 Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed. The final numbers reveal 2,410 unique crafted beers by all the microbreweries in the US. The two lists below represents the first 6 observations and last 6 observation respectivaly for the combined dataset.
 
 ```{r, Clean Merged Data, cols.print=11}
@@ -145,8 +145,8 @@ tail(m1)
 
 
 ##3. Report the number of NA's in each column.
-utilizing our joined data, we simply sum NA's and print for each column
-``` {r, NACountCalculation}
+One of the biggest challanges is empty of missing data in the fields. By utilizing our joined data, we simply sum NA's and print for each column. This provides the number of empty values per column or field in our dataset. This allows to asses how good is the data, and account for any problem that may cause.
+``` {r, NACountCalculation, rows.print=13}
 # This will count NA per field
 NACount <- sapply(m1,function(x) sum(is.na(x)))
 NACount <- as.data.frame(NACount)
@@ -155,6 +155,7 @@ NACount
 
 
 ```
+The "IBU" field has 966 empty values, this is 40% of our dataset. It is our recomendation to research for these values and try to fill it in before making any desision on it. In contrast we have the "ABV" with 62 empty values, which represent 2.5% of our dataset, this number should not skew our data analysis for ABV.
 
 ##4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
 Median alcohol content is computed using our joined dataset and then printed using a ggplot funciton.

@@ -253,7 +253,7 @@ uniqueBreweries &lt;- b[!duplicated(b[,c(&quot;TwoWords&quot;, &quot;City&quot;)
 <div id="how-many-breweries-are-present-in-each-state" class="section level2">
 <h2>1. How many breweries are present in each state?</h2>
 <p>To obtain a count of breweries by state, we use some of our previous work in the cleaning phase to perform a count by state calculation.<br />
-The number of breweries per state goes from 1 to 47. Below is the list of states order from the highest to the lowest numbers of breweries in it. Colorado is the state with the most brewer companies. On the other hand, North Dakota, South Dakota, Washington DC, and West Virginia are the states with only one craft brewer company.</p>
+The number of breweries per state ranges from 1 to 47 breweries. Below is the list of states order from the highest to the lowest numbers of breweries in it. Colorado is the state with the most brewer companies. On the other hand, North Dakota, South Dakota, Washington DC, and West Virginia are the states with only one craft brewer company.</p>
 <pre class="r"><code>#Plot Library
 library(ggplot2)
 # Count Breweries per State
@@ -281,7 +281,7 @@ ggplot(data=statehis.df, aes(x=statehis.df$Var1,y=statehis.df$Freq)) +
 <p>Here we merge the raw beer and brewery data. We have intentionally used the raw brewery data here since it ensure all beers are present for the future analysis. Analysis that requires unique breweries can be called using early cleaned datasets</p>
 <pre class="r"><code>#Merge beers and breweries data together
 m1 &lt;- merge(beers,breweries,by=&quot;Brew_ID&quot;)</code></pre>
-<p>with the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed.</p>
+<p>with the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed. The final numbers reveal 2,410 unique crafted beers by all the microbreweries in the US. The two lists below represents the first 6 observations and last 6 observation respectivaly for the combined dataset.</p>
 <pre class="r"><code>#performs search for parenthesis values, removes them from a nondestructive column for beers
 m1$beerNameNoY&lt;-gsub(&quot;[:(:].*[:):]&quot;,&quot;&quot;,m1$beerName)
 #trims white space around newly trimmed data for beers
@@ -306,7 +306,7 @@ tail(m1)</code></pre>
 </div>
 <div id="report-the-number-of-nas-in-each-column." class="section level2">
 <h2>3. Report the number of NA’s in each column.</h2>
-<p>utilizing our joined data, we simply sum NA’s and print for each column</p>
+<p>One of the biggest challanges is empty of missing data in the fields. By utilizing our joined data, we simply sum NA’s and print for each column. This provides the number of empty values per column or field in our dataset. This allows to asses how good is the data, and account for any problem that may cause.</p>
 <pre class="r"><code># This will count NA per field
 NACount &lt;- sapply(m1,function(x) sum(is.na(x)))
 NACount &lt;- as.data.frame(NACount)
@@ -314,9 +314,10 @@ colnames(NACount)=c(&quot;CountOfNAs&quot;)
 NACount</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["CountOfNAs"],"name":[1],"type":["int"],"align":["right"]}],"data":[{"1":"0","_rn_":"Brew_ID"},{"1":"0","_rn_":"beerName"},{"1":"0","_rn_":"Beer_ID"},{"1":"62","_rn_":"ABV"},{"1":"966","_rn_":"IBU"},{"1":"0","_rn_":"Style"},{"1":"0","_rn_":"Ounces"},{"1":"0","_rn_":"State"},{"1":"0","_rn_":"brewerCompany"},{"1":"0","_rn_":"City"},{"1":"0","_rn_":"stateName"},{"1":"0","_rn_":"beerNameNoY"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["CountOfNAs"],"name":[1],"type":["int"],"align":["right"]}],"data":[{"1":"0","_rn_":"Brew_ID"},{"1":"0","_rn_":"beerName"},{"1":"0","_rn_":"Beer_ID"},{"1":"62","_rn_":"ABV"},{"1":"966","_rn_":"IBU"},{"1":"0","_rn_":"Style"},{"1":"0","_rn_":"Ounces"},{"1":"0","_rn_":"State"},{"1":"0","_rn_":"brewerCompany"},{"1":"0","_rn_":"City"},{"1":"0","_rn_":"stateName"},{"1":"0","_rn_":"beerNameNoY"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[13],"max":[13]},"pages":{}}}
   </script>
 </div>
+<p>The “IBU” field has 966 empty values, this is 40% of our dataset. It is our recomendation to research for these values and try to fill it in before making any desision on it. In contrast we have the “ABV” with 62 empty values, which represent 2.5% of our dataset, this number should not skew our data analysis for ABV.</p>
 </div>
 <div id="compute-the-median-alcohol-content-and-international-bitterness-unit-for-each-state.-plot-a-bar-chart-to-compare." class="section level2">
 <h2>4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.</h2>

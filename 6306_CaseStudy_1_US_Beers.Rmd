@@ -19,42 +19,32 @@ The datasets being used for this report was sourced from the CraftCans website. 
 
 The two datasets that will be referred and used throughout this report are summarized below:
 
-1. Beers.csv
-    + Name: Name of the beer.
-    + Beer ID: Unique identifier of the beer.
-    + ABV: Alcohol by volume of the beer.
-    + IBU: International Bitterness Units of the beer.
-    + Brewery ID: Brewery id associated with the beer.
-    + Style: Style of the beer.
-    + Ounces: Ounces of beer.
+### 1 Beers.csv:
 
-2. Breweries.csv
-    + Brew ID: Unique identifier of the brewery.
-    + Name: Name of the brewery.
-    + City: City where the brewery is located.
-    + State: U.S. State where the brewery is located.
+Field Name | Field Description
+-----------|--------------------
+Name:      | Name of the beer.
+Beer ID:   | Unique identifier of the beer.
+ABV:       | Alcohol by volume of the beer.
+IBU:       | International Bitterness Units of the beer.
+Brewery ID:| Brewery id associated with the beer.
+Style:     | Style of the beer.
+Ounces:    | Ounces of beer.
 
 
-### Beers.csv:
+### 2 Breweries.csv:
+Field Name | Field Description
+-----------|--------------------
+Brew ID:   | Unique identifier of the brewery.
+Name:      | Name of the brewery.
+City:      | City where the brewery is located.
+State:     | U.S. State where the brewery is located.
 
-1. Beers.csv
-    + Name: Name of the beer.
-    + Beer ID: Unique identifier of the beer.
-    + ABV: Alcohol by volume of the beer.
-    + IBU: International Bitterness Units of the beer.
-    + Brewery ID: Brewery id associated with the beer.
-    + Style: Style of the beer.
-    + Ounces: Ounces of beer.
-
-2. Breweries.csv
-    + Brew ID: Unique identifier of the brewery.
-    + Name: Name of the brewery.
-    + City: City where the brewery is located.
-    + State: U.S. State where the brewery is located.
 
 ### Data Load
 Our first set of code loads in the data, does some early data organization for mergin the data, and adds in some basic fields for state tracking
 ```{r, Data Load, results='hide' }
+
 #Read Data into Variables
 beers <- read.csv("Beers.csv")
 breweries <-read.csv("Breweries.csv")
@@ -68,7 +58,7 @@ colnames(breweries)[2] <- c("brewerCompany")
 #Rename Brewery_id to Brew_id in beers data, same as in breweries in order to merge data sets
 colnames(beers)[5] <- c("Brew_ID")
 
-# Trim the leading white-spce from the State
+# Trim the leading white-space from the State
 breweries$State <- trimws(breweries$State)
 
 #Create State Names data frame, inlcuding Washington DC
@@ -82,7 +72,7 @@ breweries <- merge(breweries,stateNames,by="State", all=TRUE)
 ```
 
 ###Data Cleaning for Breweries 
-Here we beigin the process of cleaning our brewrery data. We first trim out white space and lower all text in the brewery data to prevent false positives when searching for duplicates. Next we perform a duplicate analysis that eliminates likely duplicate breweries by searching for rows of data that have the first two words matching in brewery name and the brewery data shares the same city.
+Here we begin the process of cleaning our brewery data. We first trim out white space and lower all text in the brewery data to prevent false positives when searching for duplicates. Next, we perform a duplicate analysis that eliminates likely duplicate breweries by searching for rows of data that have the first two words matching in brewery name, and the brewery data share the same city.
 ```{r, Breweries cleaning, results='hide'}
 
 ####this area cleans the brewrery data of most likely duplicate entries####
@@ -103,14 +93,26 @@ uniqueBreweries <- b[!duplicated(b[,c("TwoWords", "City")]),]
 # Questions of Interest
 
 ##1. How many breweries are present in each state?
-To obtain a count of breweries by state, we use some of our previous work in the cleaning phase to perform a count by state calculation
+To obtain a count of breweries by state, we use some of our previous work in the cleaning phase to perform a count by state calculation.  
+The number of breweries per state ranges from 1 to 47 breweries. Below is the list of states order from the highest to the lowest numbers of breweries in it. Colorado is the state with the most brewer companies. On the other hand,  North Dakota, South Dakota, Washington DC, and West Virginia are the states with only one craft brewer company.
 ```{r, CountBreweries}
+#Plot Library
+library(ggplot2)
 # Count Breweries per State
 
 countBrewByState <- table(uniqueBreweries$stateName)
 countBrewByState <- as.data.frame(countBrewByState)
 colnames(countBrewByState)=c("stateName","BreweriesCount")
-countBrewByState
+sort.countBState <- countBrewByState[order(-countBrewByState$BreweriesCount),]
+sort.countBState
+```
+The plot below shows the number of states versus the count of breweries in it. The most common number of breweries per state is four, with 6 states. Also, there are 19 (38%) states have 10 or more breweries.
+```{r, plot distribution}
+#Create frequncy per Number of Breweries and bar Plot
+statehis.df <- as.data.frame(table(countBrewByState$BreweriesCount))
+ggplot(data=statehis.df, aes(x=statehis.df$Var1,y=statehis.df$Freq)) + 
+  geom_bar(stat="identity") + 
+  ggtitle("Breweries Distribution") + xlab("Number of Breweries") + ylab("Number of States")
 ```
 
 ##2. Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.
@@ -122,7 +124,7 @@ m1 <- merge(beers,breweries,by="Brew_ID")
 ```
 
 with the merged data, we can begin a quick pass at removing duplicates in our dataset. We do this by looking for data that has white spaces or is stamped with a year or unique marking within parenthesis. We do not claim that this will capture all posiblities for duplicate data, but it greatly reduces duplicates for the purpose of our analysis. 
-Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed.
+Duplicate data must share the same beername,brewery name, abv, ibu, and style to be removed. The final numbers reveal 2,410 unique crafted beers by all the microbreweries in the US. The two lists below represents the first 6 observations and last 6 observation respectivaly for the combined dataset.
 
 ```{r, Clean Merged Data, cols.print=11}
 
@@ -173,7 +175,7 @@ med.st.abv
 # IBU Median per State
 med.st.ibu
 
-library(ggplot2)
+
 
 ##Histograms, Raw Data
 

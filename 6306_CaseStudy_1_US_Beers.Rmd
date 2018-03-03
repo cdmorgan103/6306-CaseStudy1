@@ -223,13 +223,21 @@ paste(m1$stateName[y], "has the highest IBU with a Max IBU of:", m1$IBU[y])
 ```
 
 ##6. Summary statistics for the ABV variable.
-refrenecing our joined dataset, we can print summary statistics for ABV
+Refrenecing our joined dataset, we can print summary statistics for ABV. 
+From the summary statistics can be infered that it is probable that the ABV variable follows a normal distribution becuase the median and the mean are very close. There is a slight rigth skew to the data, but nothing that will indicate an extreme departure from normality. One thing to notice is that, 75 % of all the beers have a 5% ABV or more. However, the intequartely distance is only 1.8 %. Meaing that 50 % of the data is between 5 and 6.8% of ABV.
 ``` {r, ABVSummary}
 # Summary for ABV Values
 summary(m1$ABV)
 ```
 ##7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. You are welcome to use the ggplot2 library for graphs. Please ignore missing values in your analysis. Make your best judgment of a relationship heand EXPLAIN your answer.
-At this point we can use ggplot with several functions to plot ibu and abv with a level of formatting to make our results easier to interpret
+
+
+
+There is visual evidence that there is a positive linear relation between the alcohol content and the IBU values (R-Squared 0.44), meaning that 44% of the IBU variation is explained by the Alcohol By Volume variable. Therefore, other factors may affect the IBU as well and they are not acounted in this regression.
+For every one percent increase in ABV value, there is an increase of 12.2 units in the IBU average (pvalue < 0.001).
+
+There is a caveat on the regresion analysis that is the 40 % missing data in IBU. This could change the regresion coeficients since currently there is no way to know where that 40% falls in IBU. Take this regression analysis with this in mind. 
+
 ``` {r Relationship}
 
 ggplot(data=m1,aes(x=m1$ABV,y=m1$IBU,colour=m1$IBU)) + geom_point() + geom_smooth(method="lm", formula=y~x) +

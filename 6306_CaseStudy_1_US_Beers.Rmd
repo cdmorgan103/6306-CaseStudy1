@@ -177,7 +177,8 @@ colnames(med.st.ibu)<- c("State","IBU")
 
 
 #NA for SD binded back in as 0 value
-med.st.ibu<-rbind(med.st.ibu,c("SD","0"))
+sdrow<-list('SD',0)
+med.st.ibu<-rbind(med.st.ibu,sdrow)
 
 # Sort the data for IBU
 med.st.ibu <- med.st.ibu[order(med.st.ibu$IBU),]
@@ -192,15 +193,14 @@ med.st.ibu
 
 ##Histograms, Raw Data
 
-ggplot(data=med.st.abv, aes(x=med.st.abv$State, y=med.st.abv$ABV, fill=med.st.abv$ABV)) + 
+ggplot(data=med.st.abv, aes(x=reorder(med.st.abv$State,-med.st.abv$ABV), y=med.st.abv$ABV, fill=med.st.abv$ABV)) + 
   geom_bar(stat="identity") + 
   ggtitle("Median ABV by state") +
-  xlab("State") + ylab("Median ABV") +guides(fill=FALSE) 
+  xlab("State") + ylab("Median ABV") +guides(fill=FALSE) + scale_fill_gradient(low = "grey",high="blue")
 
-ggplot(data=med.st.ibu, aes(x=med.st.ibu$State,y=med.st.ibu$IBU, fill=med.st.ibu$IBU)) + geom_bar(stat = "identity") + 
-  ggtitle("Median IBU by state",
-  subtitle = "SD median can not be calculated due to missing IBU data and is represented as 0") +
-  xlab("State") + ylab("Median IBU") +guides(fill=FALSE)
+ggplot(data=med.st.ibu, aes(x=reorder(med.st.ibu$State,-med.st.ibu$IBU),y=med.st.ibu$IBU, fill=med.st.ibu$IBU)) + geom_bar(stat = "identity") + 
+  ggtitle("Median IBU by state", subtitle = "SD median can not be calculated due to missing IBU data and is represented as 0") +
+  xlab("State") + ylab("Median IBU") +guides(fill=FALSE) + scale_fill_gradient(low = "yellow",high="Red")
 
 ```
 
